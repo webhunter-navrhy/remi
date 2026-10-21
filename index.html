@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>REMY — co uvařit z toho, co máš doma</title>
+  <meta name="description" content="REMY ti navrhne, co uvařit z ingrediencí, které máš doma. Vyfoť lednici, řekni počet porcí a máš recept.">
+  <meta name="theme-color" content="#f4ecdf">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+  <header class="top">
+    <a class="brand" href="#spiz" aria-label="REMY — domů">
+      <img src="assets/icon.svg" alt="" width="36" height="36">
+      <span>Remy</span>
+    </a>
+    <nav class="tabs" aria-label="Hlavní menu">
+      <a href="#spiz" data-tab="spiz"><svg viewBox="0 0 24 24"><path d="M5 3h14v18H5zM5 10h14M9 6.5h2M9 13.5h2"/></svg><span>Spíž</span></a>
+      <a href="#varit" data-tab="varit"><svg viewBox="0 0 24 24"><path d="M3 11h18v2a7 7 0 0 1-7 7h-4a7 7 0 0 1-7-7zM8 7c0-1.5 1-1.5 1-3M12 7c0-1.5 1-1.5 1-3M16 7c0-1.5 1-1.5 1-3"/></svg><span>Vařit</span></a>
+      <a href="#ulozene" data-tab="ulozene"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg><span>Uložené</span></a>
+    </nav>
+  </header>
+
+  <main>
+    <!-- ============ SPÍŽ ============ -->
+    <section id="view-spiz" class="view" data-view="spiz">
+      <div class="hero">
+        <p class="eyebrow">Tvoje spíž</p>
+        <h1>Co máš <em>doma?</em></h1>
+        <p class="lead">Napiš nebo vyfoť, co máš v lednici. REMY si to zapamatuje a podle toho ti navrhne, co uvařit.</p>
+      </div>
+
+      <div class="add-card">
+        <form id="quick-add" class="quick-add" autocomplete="off">
+          <label for="quick-input" class="sr-only">Přidat potraviny</label>
+          <input id="quick-input" type="text" placeholder="např. 6 vajec, 1 l mléka, kilo brambor" enterkeyhint="done">
+          <button type="submit" class="btn btn-primary">Přidat</button>
+        </form>
+        <div class="add-actions">
+          <label class="btn btn-soft photo-btn">
+            <svg viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            Vyfotit potraviny
+            <input id="photo-input" type="file" accept="image/*" capture="environment" hidden>
+          </label>
+          <button type="button" class="btn btn-ghost" id="demo-btn">Ukázková spíž</button>
+        </div>
+        <p class="hint">Tip: odděluj čárkou. Rozumím i „půl kila“, „dkg“ nebo „l“.</p>
+      </div>
+
+      <div class="list-head">
+        <h2>V lednici <span id="pantry-count" class="count">0</span></h2>
+        <button type="button" class="link" id="clear-pantry">Vyprázdnit</button>
+      </div>
+      <ul id="pantry-list" class="pantry"></ul>
+      <div id="pantry-empty" class="empty">
+        <p class="empty-title">Zatím tu nic není.</p>
+        <p>Přidej první potraviny nahoře, nebo si zkus ukázkovou spíž.</p>
+      </div>
+
+      <a href="#varit" class="cta-cook" id="cta-cook">
+        <span>Co z toho uvařím?</span>
+        <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+    </section>
+
+    <!-- ============ VAŘIT ============ -->
+    <section id="view-varit" class="view" data-view="varit" hidden>
+      <div class="hero">
+        <p class="eyebrow">Návrhy od Remyho</p>
+        <h1>Co dnes <em>uvaříme?</em></h1>
+        <p class="lead" id="cook-lead">Remy se podívá do tvé spíže a navrhne tři jídla.</p>
+      </div>
+
+      <div class="cook-card">
+        <div class="field">
+          <span class="field-label">Počet porcí</span>
+          <div class="stepper" role="group" aria-label="Počet porcí">
+            <button type="button" data-portions="-1" aria-label="Méně porcí">−</button>
+            <output id="portions">2</output>
+            <button type="button" data-portions="1" aria-label="Více porcí">+</button>
+          </div>
+        </div>
+        <div class="field field-col">
+          <span class="field-label">Na co máš chuť? <small>(nepovinné)</small></span>
+          <div class="chips" id="chips">
+            <button type="button" class="chip" data-note="rychlé, do 20 minut">⚡ Rychlé</button>
+            <button type="button" class="chip" data-note="bez masa">🥕 Bez masa</button>
+            <button type="button" class="chip" data-note="sladké">🍯 Sladké</button>
+            <button type="button" class="chip" data-note="zdravé a lehké">🥗 Lehké</button>
+            <button type="button" class="chip" data-note="polévka">🍲 Polévka</button>
+          </div>
+          <input id="note" type="text" placeholder="nebo napiš vlastní přání…" maxlength="120">
+        </div>
+        <button type="button" class="btn btn-primary btn-big" id="suggest-btn">Co uvařím?</button>
+      </div>
+
+      <div id="suggest-status" class="status" hidden></div>
+      <div id="recipes" class="recipes"></div>
+      <button type="button" class="btn btn-ghost more-btn" id="more-btn" hidden>Ukaž jiné návrhy</button>
+    </section>
+
+    <!-- ============ ULOŽENÉ ============ -->
+    <section id="view-ulozene" class="view" data-view="ulozene" hidden>
+      <div class="hero">
+        <p class="eyebrow">Tvoje kuchařka</p>
+        <h1>Oblíbené a <em>uvařené</em></h1>
+      </div>
+      <h2 class="sub">Oblíbené recepty</h2>
+      <div id="favorites" class="recipes"></div>
+      <p id="fav-empty" class="empty small">Recept si uložíš srdíčkem v jeho detailu.</p>
+
+      <div class="list-head">
+        <h2 class="sub">Historie vaření</h2>
+        <button type="button" class="link" id="clear-history">Smazat historii</button>
+      </div>
+      <ul id="history" class="history"></ul>
+      <p id="history-empty" class="empty small">Až něco uvaříš a klikneš na „Uvařeno“, objeví se to tady.</p>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <p>REMY · školní projekt PVA, 2.A · Rafael Borri &amp; Samuel Vargas</p>
+  </footer>
+
+  <!-- detail receptu / rozpoznání fotky -->
+  <dialog id="sheet" class="sheet">
+    <div class="sheet-inner" id="sheet-body"></div>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="js/app.js?v=1"></script>
+</body>
+</html>
