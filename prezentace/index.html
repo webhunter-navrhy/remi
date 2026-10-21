@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>REMY — prezentace</title>
+  <link rel="icon" href="../assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f4ecdf; --paper: #fffaf2; --paper-2: #f9f1e4; --ink: #2a1f17; --ink-2: #6b5a4b; --ink-3: #9a8877;
+      --line: #e6d9c6; --tomato: #c8452c; --tomato-soft: #f6dccf; --herb: #4f6d3f; --herb-soft: #e1e8d3;
+      --butter: #e8b84a; --butter-soft: #f8ebc6;
+      --serif: "Instrument Serif", Georgia, serif; --sans: "DM Sans", system-ui, sans-serif; --mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #1d1611; overflow: hidden; }
+    body { font: 400 30px/1.45 var(--sans); color: var(--ink); }
+    .deck { position: fixed; inset: 0; display: grid; place-items: center; }
+    .slide {
+      position: absolute; width: 1920px; height: 1080px; padding: 110px 140px;
+      background: var(--bg); transform-origin: center; display: none; flex-direction: column;
+    }
+    .slide.on { display: flex; animation: in .45s ease both; }
+    @keyframes in { from { opacity: 0; } }
+    .num { position: absolute; right: 70px; bottom: 50px; font-size: 22px; color: var(--ink-3); }
+    .logo { position: absolute; left: 70px; bottom: 44px; display: flex; gap: 12px; align-items: center; font: 400 32px/1 var(--serif); color: var(--ink-2); }
+    .logo img { width: 34px; }
+    .eyebrow { color: var(--tomato); font-weight: 600; font-size: 24px; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 18px; }
+    h1 { font: 400 190px/.92 var(--serif); margin: 0; letter-spacing: -.01em; }
+    h2 { font: 400 104px/1 var(--serif); margin: 0 0 50px; letter-spacing: -.01em; }
+    em { color: var(--tomato); }
+    p { margin: 0; }
+    .lead { font-size: 40px; color: var(--ink-2); max-width: 1200px; margin-top: 36px; }
+    .grid { display: grid; gap: 28px; }
+    .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: repeat(3, 1fr); }
+    .card { background: var(--paper); border: 1px solid var(--line); border-radius: 32px; padding: 36px 40px; }
+    .card h3 { font: 400 46px/1.05 var(--serif); margin: 0 0 12px; }
+    .card p { color: var(--ink-2); font-size: 27px; }
+    .card .ic { font-size: 54px; line-height: 1; margin-bottom: 18px; }
+    .tag { display: inline-block; padding: 6px 18px; border-radius: 999px; background: var(--butter-soft); font-size: 24px; margin: 0 8px 8px 0; }
+    .row { display: flex; gap: 60px; align-items: center; flex: 1; }
+    .phone { width: 380px; border-radius: 46px; border: 10px solid #2a1f17; box-shadow: 0 40px 80px -30px rgba(40,20,5,.5); display: block; }
+    ul.clean { list-style: none; padding: 0; margin: 0; display: grid; gap: 22px; }
+    ul.clean li { display: flex; gap: 20px; align-items: baseline; }
+    ul.clean li::before { content: "—"; color: var(--tomato); }
+    .prompt { font: 400 25px/1.5 var(--mono); background: #2a1f17; color: #f3e9dc; border-radius: 26px; padding: 30px 36px; }
+    .prompt b { color: var(--butter); font-weight: 400; }
+    table { border-collapse: collapse; width: 100%; font-size: 26px; }
+    td { padding: 18px 22px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    td:first-child { color: var(--ink-2); width: 48%; }
+    td:last-child { font-weight: 500; }
+    .flow { display: grid; grid-template-columns: 1fr 90px 1fr 90px 1fr; align-items: stretch; gap: 0; }
+    .arrow { display: grid; place-items: center; font-size: 60px; color: var(--tomato); }
+    .commits { font: 400 23px/1.4 var(--mono); }
+    .commits div { display: flex; gap: 24px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+    .commits span:first-child { color: var(--tomato); flex: none; }
+    .commits span:nth-child(2) { color: var(--ink-3); flex: none; width: 200px; }
+    .big-link { font: 400 64px/1.1 var(--serif); color: var(--ink); text-decoration: none; border-bottom: 3px solid var(--tomato); }
+    .dark { background: #2a1f17; color: #f3e9dc; }
+    .dark .lead, .dark .num { color: #c4b3a0; }
+    .hint { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); color: #8f7e6c; font: 14px var(--sans); opacity: .7; }
+    @media print {
+      @page { size: 1920px 1080px; margin: 0; }
+      html, body { overflow: visible; height: auto; background: none; }
+      .deck { position: static; display: block; }
+      .slide { position: relative; display: flex !important; transform: none !important; page-break-after: always; animation: none; }
+      .hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide dark">
+    <p class="eyebrow">Vibecoding projekt · PVA · 2.A</p>
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <h1>REMY</h1>
+        <p class="lead" style="font-size:52px;font-family:var(--serif);color:#f3e9dc">Co uvařit z toho, co máš <em>doma.</em></p>
+        <p class="lead" style="margin-top:60px">Rafael Borri &amp; Samuel Vargas</p>
+      </div>
+      <img src="../assets/icon.svg" alt="" style="width:340px">
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <p class="eyebrow">Problém</p>
+    <h2>„Co dneska <em>uvaříme?“</em></h2>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="card"><div class="ic">🤷</div><h3>Nevíme, co vařit</h3><p>Lednice plná, ale žádný nápad. Skončí to objednávkou jídla.</p></div>
+      <div class="card"><div class="ic">🥫</div><h3>Jídlo se vyhazuje</h3><p>Suroviny se zkazí, protože zapomeneme, co doma máme.</p></div>
+      <div class="card"><div class="ic">👨‍🍳</div><h3>Neumíme vařit</h3><p>Recepty na internetu chtějí suroviny, které nemáme.</p></div>
+    </div>
+    <p class="lead"><b style="color:var(--ink)">REMY</b> navrhne jídlo přesně z toho, co máš doma — pro lidi, co neví, co uvařit, nebo vařit moc neumí.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <p class="eyebrow">Co aplikace umí</p>
+    <h2>Hlavní <em>funkce</em></h2>
+    <div class="grid g3">
+      <div class="card"><div class="ic">✍️</div><h3>Napiš, co máš</h3><p>„6 vajec, 1 l mléka, kilo brambor“ — REMY tomu rozumí.</p></div>
+      <div class="card"><div class="ic">📷</div><h3>Nebo to vyfoť</h3><p>AI na fotce najde potraviny a odhadne množství.</p></div>
+      <div class="card"><div class="ic">🍽️</div><h3>Porce a přání</h3><p>Počet porcí, rychlé, bez masa, sladké, polévka…</p></div>
+      <div class="card"><div class="ic">✦</div><h3>Recepty od AI</h3><p>Tři návrhy s postupem krok za krokem pro začátečníky.</p></div>
+      <div class="card"><div class="ic">🧠</div><h3>Pamatuje si spíž</h3><p>Po kliknutí „Uvařeno“ sám odečte spotřebované suroviny.</p></div>
+      <div class="card"><div class="ic">❤️</div><h3>Oblíbené a historie</h3><p>Uložené recepty a přehled, co jsme kdy vařili.</p></div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <p class="eyebrow">Živá ukázka</p>
+    <div class="row">
+      <img class="phone" src="img/spiz.png" alt="Obrazovka Spíž">
+      <img class="phone" src="img/recepty.png" alt="Návrhy receptů">
+      <div style="flex:1;padding-left:20px">
+        <h2 style="margin-bottom:30px">Pojďme <em>vařit</em></h2>
+        <a class="big-link" href="https://webhunter-navrhy.github.io/remi/" target="_blank">webhunter-navrhy.github.io/remi</a>
+        <div style="display:flex;gap:36px;align-items:center;margin-top:50px">
+          <img src="qr.svg" alt="QR kód aplikace" style="width:200px;background:var(--paper);padding:18px;border-radius:24px">
+          <p style="color:var(--ink-2);font-size:28px">Naskenuj a zkus si to<br>na svém telefonu.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <p class="eyebrow">Jak to funguje</p>
+    <h2>Pod <em>pokličkou</em></h2>
+    <div class="flow">
+      <div class="card"><div class="ic">🖥️</div><h3>Prohlížeč</h3><p>HTML, CSS, čistý JavaScript (moduly).<br>Spíž, historie a oblíbené v <b>localStorage</b>.<br>Hosting: GitHub Pages.</p></div>
+      <div class="arrow">→</div>
+      <div class="card"><div class="ic">☁️</div><h3>Cloudflare Worker</h3><p>Náš malý server. Schová přístup k AI, kontroluje vstupy, vynutí JSON a při chybě to zkusí znovu.</p></div>
+      <div class="arrow">→</div>
+      <div class="card"><div class="ic">✦</div><h3>Workers AI</h3><p><b>Llama 4 Scout</b> — vidí fotky.<br><b>Llama 3.3 70B</b> — píše recepty.</p></div>
+    </div>
+    <p class="lead">Když AI neodpovídá, REMY použije <b style="color:var(--ink)">vlastní záložní kuchařku</b> 16 jídel a vybere, co jde uvařit z tvé spíže.</p>
+  </section>
+
+  <!-- 6 -->
+  <section class="slide">
+    <p class="eyebrow">Tým</p>
+    <h2>Kdo na čem <em>pracoval</em></h2>
+    <div class="grid g2">
+      <div class="card">
+        <div class="ic">⚙️</div><h3>Rafael Borri — funkcionalita</h3>
+        <ul class="clean" style="font-size:28px;color:var(--ink-2);margin-top:20px">
+          <li>napojení na AI, Cloudflare Worker</li>
+          <li>spíž a odečítání surovin po uvaření</li>
+          <li>parser textu, záložní kuchařka</li>
+          <li>GitHub repozitář a nasazení</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="ic">🎨</div><h3>Samuel Vargas — design</h3>
+        <ul class="clean" style="font-size:28px;color:var(--ink-2);margin-top:20px">
+          <li>vzhled a barevná paleta „kuchyně“</li>
+          <li>písma, ikona aplikace</li>
+          <li>mobilní verze a tmavý režim</li>
+          <li>testování na telefonu</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="slide">
+    <p class="eyebrow">Jak jsme používali AI</p>
+    <h2>Prompty, které <em>vaří</em></h2>
+    <div class="grid g2" style="align-items:start">
+      <div>
+        <p style="font-size:24px;color:var(--ink-3);margin-bottom:12px">Zadání pro AI agenta (OpenCode / Claude Code)</p>
+        <div class="prompt">Udělej webovou aplikaci REMY: uživatel napíše nebo vyfotí, co má doma, zadá počet porcí a aplikace navrhne recepty. Pamatuje si, co má doma, a po uvaření suroviny <b>sama odečte</b>. Čistý JavaScript, ať to běží na GitHub Pages.</div>
+      </div>
+      <div>
+        <p style="font-size:24px;color:var(--ink-3);margin-bottom:12px">Prompt uvnitř aplikace (worker → AI)</p>
+        <div class="prompt">Jsi REMY, malý šéfkuchař. Uživatel má doma: <b>{spíž}</b>. Navrhni 3 různá jídla pro <b>{porce}</b> porce HLAVNĚ z těchto potravin. Sůl, pepř a olej ber jako samozřejmost. Postup 5–8 kroků v rozkazovacím způsobu… Odpověz POUZE validním JSON.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:34px">
+      <div class="card" style="padding:26px 34px"><h3 style="font-size:36px">✓ Fungovalo</h3><p>Rozpoznání potravin z fotky, JSON schéma, generování celé kostry aplikace.</p></div>
+      <div class="card" style="padding:26px 34px"><h3 style="font-size:36px">✗ Museli jsme opravit</h3><p>Rozbitý JSON, divná jídla z malého modelu, „6 vajec“ uložené jako „vajec“.</p></div>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="slide">
+    <p class="eyebrow">Git</p>
+    <h2>Historie <em>commitů</em></h2>
+    <div class="commits" id="commits">
+      <!-- vygenerováno z git log -->
+    </div>
+    <p class="lead" style="font-size:30px">Repozitář: <b style="color:var(--ink)">github.com/webhunter-navrhy/remi</b></p>
+  </section>
+
+  <!-- 9 -->
+  <section class="slide">
+    <p class="eyebrow">Problémy a řešení</p>
+    <h2>Co se <em>připálilo</em></h2>
+    <table>
+      <tr><td>Gemini API klíč nefungoval — modely vracely chybu 404</td><td>Přechod na Cloudflare Workers AI (zdarma)</td></tr>
+      <tr><td>API klíč nesmí být v kódu na GitHubu — viděl by ho každý</td><td>Vlastní Cloudflare Worker jako prostředník</td></tr>
+      <tr><td>AI občas vrátila rozbitý JSON a aplikace spadla</td><td>JSON schéma + druhý pokus + záložní kuchařka</td></tr>
+      <tr><td>Malý model vymýšlel divná jídla, míchal „uvař“ a „smícháme“</td><td>Větší model a přesnější prompt</td></tr>
+      <tr><td>„Rajčata“ a „rajče“ se ve spíži nesčítaly</td><td>Normalizace názvů (bez diakritiky, kmeny slov)</td></tr>
+      <tr><td>Fotky z mobilu mají několik MB</td><td>Zmenšení v prohlížeči na 1024 px</td></tr>
+    </table>
+  </section>
+
+  <!-- 10 -->
+  <section class="slide">
+    <p class="eyebrow">Co dál</p>
+    <h2>Plán do dalších <em>výstupů</em></h2>
+    <div class="grid g2">
+      <div class="card">
+        <h3>Výstup 2 · listopad</h3>
+        <ul class="clean" style="font-size:28px;color:var(--ink-2);margin-top:18px">
+          <li>nákupní seznam z chybějících surovin</li>
+          <li>trvanlivost — „spotřebuj nejdřív“</li>
+          <li>testování s reálnými uživateli</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Výstup 3 · prosinec</h3>
+        <ul class="clean" style="font-size:28px;color:var(--ink-2);margin-top:18px">
+          <li>hlasové zadávání potravin</li>
+          <li>sdílená spíž pro celou rodinu</li>
+          <li>alergie a diety, kalorie</li>
+          <li>doladěný design, finální README</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="slide dark" style="justify-content:center">
+    <h1 style="font-size:170px">Dobrou <em>chuť!</em></h1>
+    <p class="lead" style="font-size:44px">Díky za pozornost. Otázky?</p>
+    <p class="lead" style="margin-top:70px">webhunter-navrhy.github.io/remi · github.com/webhunter-navrhy/remi</p>
+  </section>
+
+</div>
+<div class="hint">← → listování · F celá obrazovka</div>
+
+<script>
+  const COMMITS = [];
+  document.getElementById("commits").innerHTML = COMMITS
+    .map(([h, d, m]) => `<div><span>${h}</span><span>${d}</span><span>${m}</span></div>`).join("");
+
+  const slides = [...document.querySelectorAll(".slide")];
+  slides.forEach((s, i) => {
+    s.insertAdjacentHTML("beforeend", `<div class="num">${i + 1} / ${slides.length}</div>`);
+    if (!s.classList.contains("dark")) s.insertAdjacentHTML("beforeend", `<div class="logo"><img src="../assets/icon.svg" alt="">Remy</div>`);
+  });
+  let cur = Math.min(slides.length - 1, Math.max(0, (parseInt(location.hash.slice(1)) || 1) - 1));
+  function fit() {
+    const k = Math.min(innerWidth / 1920, innerHeight / 1080);
+    slides.forEach((s) => (s.style.transform = `scale(${k})`));
+  }
+  function show(i) {
+    cur = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => s.classList.toggle("on", j === cur));
+    history.replaceState(null, "", "#" + (cur + 1));
+  }
+  addEventListener("resize", fit);
+  addEventListener("keydown", (e) => {
+    if (["ArrowRight", "PageDown", " ", "Enter"].includes(e.key)) show(cur + 1);
+    if (["ArrowLeft", "PageUp", "Backspace"].includes(e.key)) show(cur - 1);
+    if (e.key === "Home") show(0);
+    if (e.key === "End") show(slides.length - 1);
+    if (e.key.toLowerCase() === "f") document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  });
+  addEventListener("click", (e) => {
+    if (e.target.closest("a")) return;
+    show(e.clientX > innerWidth / 3 ? cur + 1 : cur - 1);
+  });
+  fit();
+  show(cur);
+</script>
+</body>
+</html>
