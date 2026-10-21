@@ -65,6 +65,11 @@ button { cursor: pointer; }
   position: sticky; top: 0; z-index: 20;
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 20px;
+}
+/* rozmazané pozadí přes pseudo-element: backdrop-filter přímo na hlavičce by
+   z ní udělal kontejner pro position:fixed a spodní menu na mobilu by skočilo nahoru */
+.top::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
   background: color-mix(in srgb, var(--bg) 85%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -149,15 +154,16 @@ h2.sub { margin: 28px 4px 12px; }
   border-radius: 999px; background: var(--butter-soft); color: var(--ink); font: 600 14px/1 var(--sans); vertical-align: middle;
 }
 
-.pantry { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.pantry { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .item {
   display: flex; align-items: center; gap: 12px;
   padding: 10px 10px 10px 16px;
   background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
 }
 .item-emoji { font-size: 22px; width: 28px; text-align: center; }
-.item-name { flex: 1; min-width: 0; font-weight: 500; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qty { display: flex; align-items: center; gap: 2px; background: var(--paper-2); border-radius: 999px; padding: 3px; }
+.item-name { flex: 1; min-width: 0; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-name::first-letter { text-transform: uppercase; }
+.qty { flex: none; display: flex; align-items: center; gap: 2px; background: var(--paper-2); border-radius: 999px; padding: 3px; }
 .qty button {
   width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent;
   font-size: 18px; line-height: 1; color: var(--ink-2);
