@@ -1,0 +1,313 @@
+/* REMY — teplá kuchyňská paleta: smetana, rajče, bylinky */
+
+:root {
+  --bg: #f4ecdf;
+  --paper: #fffaf2;
+  --paper-2: #f9f1e4;
+  --ink: #2a1f17;
+  --ink-2: #6b5a4b;
+  --ink-3: #9a8877;
+  --line: #e6d9c6;
+  --tomato: #c8452c;
+  --tomato-ink: #fff6ef;
+  --tomato-soft: #f6dccf;
+  --herb: #4f6d3f;
+  --herb-soft: #e1e8d3;
+  --butter: #e8b84a;
+  --butter-soft: #f8ebc6;
+  --shadow: 0 1px 2px rgba(60, 35, 15, .05), 0 8px 24px -12px rgba(60, 35, 15, .18);
+  --radius: 22px;
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "DM Sans", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1b1511;
+    --paper: #251d17;
+    --paper-2: #2d241d;
+    --ink: #f3e9dc;
+    --ink-2: #c4b3a0;
+    --ink-3: #8f7e6c;
+    --line: #3a2f26;
+    --tomato: #e0603f;
+    --tomato-ink: #1b1511;
+    --tomato-soft: #45261c;
+    --herb: #9cbc84;
+    --herb-soft: #2c3524;
+    --butter: #e8b84a;
+    --butter-soft: #3d321a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px -14px rgba(0, 0, 0, .6);
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.55 var(--sans);
+  min-height: 100dvh;
+  padding-bottom: calc(84px + env(safe-area-inset-bottom));
+}
+svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+[hidden] { display: none !important; }
+
+/* ---------- hlavička a navigace ---------- */
+
+.top {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.brand span { font: 400 30px/1 var(--serif); letter-spacing: .01em; }
+
+.tabs {
+  position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom));
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px; box-shadow: var(--shadow);
+}
+.tabs a {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 8px 4px; border-radius: 999px;
+  color: var(--ink-3); text-decoration: none; font-size: 12.5px; font-weight: 500;
+  transition: background .2s, color .2s;
+}
+.tabs a.active { background: var(--tomato-soft); color: var(--tomato); }
+
+@media (min-width: 760px) {
+  body { padding-bottom: 0; }
+  .top { padding: 18px 40px; }
+  .tabs { position: static; display: flex; gap: 4px; box-shadow: none; }
+  .tabs a { flex-direction: row; gap: 8px; padding: 9px 18px; font-size: 15px; }
+  .tabs svg { width: 18px; height: 18px; }
+}
+
+main { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+.view { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+
+.hero { padding: 28px 4px 22px; }
+.eyebrow { margin: 0 0 6px; color: var(--tomato); font-size: 13px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+h1 { margin: 0; font: 400 clamp(44px, 11vw, 72px)/.98 var(--serif); letter-spacing: -.01em; }
+h1 em { color: var(--tomato); }
+.lead { margin: 14px 0 0; max-width: 34em; color: var(--ink-2); font-size: 17px; }
+h2 { margin: 0; font: 400 28px/1.1 var(--serif); }
+h2.sub { margin: 28px 4px 12px; }
+
+/* ---------- tlačítka ---------- */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; padding: 0 20px; border-radius: 999px; border: 1px solid transparent;
+  font-weight: 500; text-decoration: none; white-space: nowrap;
+  transition: transform .15s, background .2s, opacity .2s;
+}
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .55; cursor: progress; }
+.btn-primary { background: var(--tomato); color: var(--tomato-ink); }
+.btn-primary:hover { background: color-mix(in srgb, var(--tomato) 88%, black); }
+.btn-soft { background: var(--herb-soft); color: var(--herb); }
+.btn-ghost { background: transparent; border-color: var(--line); color: var(--ink-2); }
+.btn-ghost:hover { background: var(--paper-2); }
+.btn-big { width: 100%; min-height: 56px; font-size: 18px; }
+.link { background: none; border: 0; padding: 4px; color: var(--ink-3); font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+.link:hover { color: var(--tomato); }
+
+/* ---------- spíž ---------- */
+
+.add-card, .cook-card {
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 16px; box-shadow: var(--shadow);
+}
+.quick-add { display: flex; gap: 8px; }
+.quick-add input, .field input {
+  flex: 1; min-width: 0; height: 50px; padding: 0 18px;
+  background: var(--paper-2); border: 1px solid var(--line); border-radius: 999px; outline: none;
+}
+.quick-add input:focus, .field input:focus { border-color: var(--tomato); background: var(--paper); }
+.add-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.photo-btn { cursor: pointer; flex: 1 1 200px; }
+.add-actions .btn-ghost { flex: 1 1 140px; }
+.hint { margin: 10px 4px 0; color: var(--ink-3); font-size: 13.5px; }
+
+.list-head { display: flex; align-items: baseline; justify-content: space-between; margin: 32px 4px 12px; }
+.list-head h2.sub { margin: 0; }
+.count {
+  display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 8px; margin-left: 6px;
+  border-radius: 999px; background: var(--butter-soft); color: var(--ink); font: 600 14px/1 var(--sans); vertical-align: middle;
+}
+
+.pantry { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 10px 10px 16px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px;
+}
+.item-emoji { font-size: 22px; width: 28px; text-align: center; }
+.item-name { flex: 1; min-width: 0; font-weight: 500; text-transform: capitalize; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qty { display: flex; align-items: center; gap: 2px; background: var(--paper-2); border-radius: 999px; padding: 3px; }
+.qty button {
+  width: 32px; height: 32px; border-radius: 50%; border: 0; background: transparent;
+  font-size: 18px; line-height: 1; color: var(--ink-2);
+}
+.qty button:hover { background: var(--paper); color: var(--tomato); }
+.qty-val {
+  min-width: 72px; text-align: center; font-variant-numeric: tabular-nums; font-size: 14.5px;
+  background: none; border: 0; padding: 4px 2px; border-radius: 8px;
+}
+input.qty-val { width: 72px; background: var(--paper); outline: 1px solid var(--tomato); }
+.del { width: 34px; height: 34px; border: 0; border-radius: 50%; background: transparent; color: var(--ink-3); display: grid; place-items: center; }
+.del:hover { color: var(--tomato); background: var(--tomato-soft); }
+.del svg { width: 18px; height: 18px; }
+
+.empty { text-align: center; color: var(--ink-3); padding: 28px 16px; border: 1.5px dashed var(--line); border-radius: var(--radius); }
+.empty p { margin: 0; }
+.empty-title { font: 400 24px/1.2 var(--serif); color: var(--ink-2); margin-bottom: 4px !important; }
+.empty.small { padding: 18px; font-size: 14.5px; }
+
+.cta-cook {
+  display: flex; align-items: center; justify-content: space-between;
+  margin: 24px 0 32px; padding: 20px 24px; border-radius: var(--radius);
+  background: var(--ink); color: var(--bg); text-decoration: none;
+  font: 400 28px/1.1 var(--serif);
+  transition: transform .2s;
+}
+.cta-cook:hover { transform: translateY(-2px); }
+.cta-cook svg { width: 28px; height: 28px; }
+
+/* ---------- vařit ---------- */
+
+.field { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 4px 14px; border-bottom: 1px solid var(--line); margin-bottom: 14px; }
+.field-col { flex-direction: column; align-items: stretch; }
+.field-label { font-weight: 500; }
+.field-label small { color: var(--ink-3); font-weight: 400; }
+.stepper { display: flex; align-items: center; gap: 4px; background: var(--paper-2); border-radius: 999px; padding: 4px; }
+.stepper button { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--paper); font-size: 20px; box-shadow: var(--shadow); }
+.stepper output { min-width: 40px; text-align: center; font: 400 28px/1 var(--serif); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line);
+  background: var(--paper-2); font-size: 14.5px; transition: all .15s;
+}
+.chip.on { background: var(--butter-soft); border-color: var(--butter); }
+.field input { width: 100%; flex: none; }
+
+.status {
+  display: flex; align-items: center; gap: 14px; margin: 18px 0; padding: 16px 18px;
+  border-radius: 18px; background: var(--butter-soft); color: var(--ink);
+}
+.status.error { background: var(--tomato-soft); }
+.status.info { background: var(--herb-soft); }
+.pot { width: 34px; height: 34px; flex: none; position: relative; }
+.pot::before { content: "🥘"; font-size: 30px; line-height: 34px; display: block; animation: wobble 1.2s ease-in-out infinite; }
+@keyframes wobble { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+
+.recipes { display: grid; gap: 12px; margin-top: 18px; }
+@media (min-width: 760px) { .recipes { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); } }
+.recipe-card {
+  display: flex; flex-direction: column; gap: 6px; text-align: left;
+  padding: 18px; border-radius: var(--radius);
+  background: var(--paper); border: 1px solid var(--line); box-shadow: var(--shadow);
+  transition: transform .2s, border-color .2s;
+  animation: fade .4s ease both;
+}
+.recipe-card:hover { transform: translateY(-3px); border-color: var(--tomato); }
+.recipe-card .emoji { font-size: 40px; line-height: 1; margin-bottom: 6px; }
+.recipe-card h3 { margin: 0; font: 400 26px/1.08 var(--serif); }
+.recipe-card p { margin: 0; color: var(--ink-2); font-size: 14.5px; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tag { padding: 3px 10px; border-radius: 999px; background: var(--paper-2); color: var(--ink-2); font-size: 13px; }
+.tag.ok { background: var(--herb-soft); color: var(--herb); }
+.tag.ai { background: var(--butter-soft); color: var(--ink); }
+.more-btn { display: flex; margin: 16px auto 32px; }
+
+/* ---------- uložené ---------- */
+
+.history { list-style: none; margin: 0 0 32px; padding: 0; display: grid; gap: 8px; }
+.history li {
+  display: flex; gap: 12px; align-items: center; padding: 12px 16px;
+  background: var(--paper); border: 1px solid var(--line); border-radius: 18px; cursor: pointer;
+}
+.history .h-emoji { font-size: 26px; }
+.history .h-name { font-weight: 500; }
+.history .h-meta { color: var(--ink-3); font-size: 13.5px; }
+
+/* ---------- detail (sheet) ---------- */
+
+.sheet {
+  width: min(640px, 100%); max-width: 100%; max-height: 92dvh; margin: auto auto 0;
+  padding: 0; border: 0; border-radius: 28px 28px 0 0;
+  background: var(--paper); color: var(--ink); box-shadow: 0 -20px 60px rgba(0, 0, 0, .25);
+}
+.sheet[open] { animation: up .35s cubic-bezier(.2, .8, .2, 1) both; }
+@keyframes up { from { transform: translateY(40px); opacity: 0; } }
+.sheet::backdrop { background: rgba(30, 18, 10, .45); backdrop-filter: blur(3px); }
+@media (min-width: 760px) { .sheet { margin: auto; border-radius: 28px; } }
+.sheet-inner { padding: 22px 22px 28px; }
+.sheet-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.sheet-top .emoji { font-size: 52px; line-height: 1; }
+.icon-btn {
+  width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: var(--paper-2);
+  display: grid; place-items: center; color: var(--ink-2);
+}
+.icon-btn.fav { color: var(--tomato); }
+.icon-btn.fav svg { fill: var(--tomato); }
+.sheet h2 { font-size: 38px; margin: 14px 0 6px; }
+.sheet .desc { color: var(--ink-2); margin: 0; }
+.sheet h4 { margin: 24px 0 10px; font: 600 13px/1 var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.ing { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.ing li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--paper-2); }
+.ing .dot { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 600; flex: none; }
+.ing .have .dot { background: var(--herb-soft); color: var(--herb); }
+.ing .low .dot { background: var(--butter-soft); color: #9a6b00; }
+.ing .miss .dot { background: var(--tomato-soft); color: var(--tomato); }
+.ing .amt { margin-left: auto; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 14.5px; }
+.ing .note { color: var(--ink-3); font-size: 13px; }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 8px; }
+.steps li {
+  counter-increment: s; display: flex; gap: 12px; padding: 12px; border-radius: 14px; cursor: pointer;
+  transition: opacity .2s, background .2s;
+}
+.steps li:hover { background: var(--paper-2); }
+.steps li::before {
+  content: counter(s); flex: none; width: 30px; height: 30px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--tomato-soft); color: var(--tomato); font-weight: 600; font-size: 14px;
+}
+.steps li.done { opacity: .45; text-decoration: line-through; }
+.steps li.done::before { content: "✓"; background: var(--herb-soft); color: var(--herb); }
+.sheet-actions { position: sticky; bottom: 0; display: flex; gap: 8px; margin: 24px -22px -28px; padding: 14px 22px calc(18px + env(safe-area-inset-bottom)); background: linear-gradient(transparent, var(--paper) 30%); }
+.sheet-actions .btn { flex: 1; }
+
+.scan-preview { width: 100%; max-height: 240px; object-fit: cover; border-radius: 18px; display: block; margin: 14px 0; }
+.scan-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.scan-list li { display: flex; align-items: center; gap: 10px; padding: 6px 8px 6px 12px; border-radius: 14px; background: var(--paper-2); }
+.scan-list input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--herb); }
+.scan-list .s-name { flex: 1; border: 0; background: transparent; min-width: 0; font-weight: 500; padding: 6px 0; }
+.scan-list .s-amt { width: 70px; border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; background: var(--paper); text-align: right; }
+.scan-list select { border: 1px solid var(--line); border-radius: 10px; padding: 6px; background: var(--paper); color: var(--ink); font: inherit; }
+
+/* ---------- toast a patička ---------- */
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(96px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  z-index: 50; display: flex; align-items: center; gap: 14px;
+  max-width: calc(100% - 32px); padding: 12px 14px 12px 18px; border-radius: 999px;
+  background: var(--ink); color: var(--bg); box-shadow: var(--shadow); font-size: 15px;
+  animation: up .3s ease both;
+}
+.toast button { background: none; border: 0; color: var(--butter); font-weight: 600; padding: 4px 8px; }
+@media (min-width: 760px) { .toast { bottom: 28px; } }
+
+.foot { max-width: 760px; margin: 0 auto; padding: 24px 20px 40px; color: var(--ink-3); font-size: 13px; text-align: center; }
