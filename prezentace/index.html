@@ -250,7 +250,7 @@
 <div class="hint">← → listování · F celá obrazovka</div>
 
 <script>
-  const COMMITS = [];
+  const COMMITS = [["85ab561", "21. 10. 08:07", "Základ projektu: README s popisem aplikace a poznámky k použití AI"], ["6cf2a02", "21. 10. 08:07", "AI worker na Cloudflare: rozpoznání potravin z fotky a návrhy receptů s JSON schématem"], ["f52ec93", "21. 10. 08:07", "Spíž v localStorage: slučování stejných potravin a odečtení surovin po uvaření"], ["ed29c33", "21. 10. 08:07", "Parser textu (6 vajec, 1 l mléka) a záložní kuchařka pro případ výpadku AI"], ["5d4a96b", "21. 10. 08:07", "Obrazovky Spíž, Vařit a Uložené: přidání z fotky, návrhy receptů, detail a tlačítko Uvařeno"], ["1c73f6c", "21. 10. 08:07", "Vzhled aplikace: teplá paleta, písma Instrument Serif a DM Sans, mobilní navigace, tmavý režim"], ["1f1521a", "21. 10. 08:07", "PWA: manifest, ikona a service worker pro přidání na plochu telefonu"], ["2260796", "21. 10. 08:10", "Oprava mobilu: spodní menu skákalo nahoru, položky spíže přetékaly; výchozí množství v parseru"], ["73560df", "21. 10. 08:10", "Prezentace k výstupu: slidy, screenshoty aplikace a QR kód"]];
   document.getElementById("commits").innerHTML = COMMITS
     .map(([h, d, m]) => `<div><span>${h}</span><span>${d}</span><span>${m}</span></div>`).join("");
 
