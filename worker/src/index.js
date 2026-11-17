@@ -90,10 +90,11 @@ async function recognize(env, { image }) {
 
 POSTUP:
 1. Projdi celou fotku — lednici, polici, stůl, nákupní tašku i obaly.
-2. Pojmenuj každou rozpoznatelnou potravinu česky, v 1. pádě jednotného čísla ("vejce", "mléko", "rajče").
+2. Pojmenuj každou rozpoznatelnou potravinu ČESKY, v 1. pádě jednotného čísla ("vejce", "mléko", "rajče").
 3. U každé odhadni množství. Jednotky používej jen: ks, g, ml.
 
 PRAVIDLA:
+- Všechny názvy piš výhradně česky. Je-li na obalu cizí jazyk, přelož ho: "sausages" → "klobása", "pepper" → "pepř", "chicken" → "kuře". Cizí slova nikdy neopisuj.
 - Ignoruj to, co není jídlo (nádobí, ruce, nábytek, pozadí, text v pozadí).
 - Rozmazaná fotka, špatné světlo ani šikmý úhel nejsou důvod k selhání: rozpoznej, co vidíš, a zbytek vynech.
 - Když je vidět jen část potraviny nebo jen obal, poznej ji podle nápisu a použij rozumné výchozí množství (1 ks, 100 g, 500 ml).
@@ -162,6 +163,12 @@ Navrhni ${count} různá jídla pro ${portions} ${portions === 1 ? "porci" : por
 Základní věci jako sůl, pepř, voda a olej ber jako samozřejmost (nepiš je do "uses" ani "missing").
 Do "uses" dej jen potraviny ze seznamu výše a přesné množství, které recept spotřebuje (stejné názvy a jednotky jako v seznamu).
 Do "missing" dej maximálně 2 věci, které by se hodily dokoupit (může být prázdné).
+
+JAZYK:
+- Všechny texty piš výhradně česky: name, description, steps, uses, missing i difficulty.
+- Žádná anglická ani jiná cizí slova ("pepper" → "pepř", "sausages" → "klobása", "chicken" → "kuře"). Platí i pro potraviny v seznamu výše — převeď je do češtiny.
+- difficulty používej jen: "snadné", "střední", "těžké".
+
 ${note ? `Přání uživatele: ${note}\n` : ""}${exclude.length ? `Tato jídla už uživatel viděl, navrhni jiná: ${exclude.join(", ")}\n` : ""}Navrhuj skutečná, chutná jídla, která se v Česku běžně vaří (žádné vymyšlené kombinace), a ať se od sebe liší (např. hlavní jídlo, polévka/příloha, něco rychlého).
 Piš spisovnou češtinou, jednoduše, aby to zvládl i úplný začátečník. Postup 5–8 kroků, každý krok jedna až dvě věty v rozkazovacím způsobu 2. osoby (např. "Nakrájej cibuli najemno a osmahni ji 3 minuty na oleji."), s konkrétními časy, teplotami a velikostí plotny.
 Odpověz POUZE validním JSON bez dalšího textu ve tvaru:
