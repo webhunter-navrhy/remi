@@ -35,6 +35,13 @@ const RECIPES_SCHEMA = {
   required: ["recipes"],
 };
 
+// Chyba, jejíž text chceme ukázat uživateli přesně tak, jak je
+class UserError extends Error {}
+
+// Jednotná hláška, kdykoli z fotky nic rozumného nevyleze — nikdy nesmí přijít prázdná odpověď
+const NO_FOOD =
+  "Na fotce se mi nepodařilo rozpoznat žádné potraviny. Vyfoť obsah lednice, spíže nebo nákupu zblízka, při dobrém světle a bez rozmazání.";
+
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
@@ -68,6 +75,7 @@ export default {
       if (url.pathname === "/recipes") return json(await recipes(env, body));
       return json({ error: "Neznámý endpoint" }, 404);
     } catch (err) {
+      if (err instanceof UserError) return json({ error: err.message }, 422);
       return json({ error: "AI teď neodpověděla, zkus to znovu.", detail: String(err?.message || err) }, 502);
     }
   },
@@ -75,32 +83,65 @@ export default {
 
 // Rozpoznání ingrediencí z fotky (lednice, nákup, spíž…)
 async function recognize(env, { image }) {
-  if (!image || !image.startsWith("data:image/")) throw new Error("Chybí fotka");
-  if (image.length > 6_000_000) throw new Error("Fotka je moc velká");
+  if (!image || !image.startsWith("data:image/")) throw new UserError("Chybí fotka");
+  if (image.length > 6_000_000) throw new UserError("Fotka je moc velká");
 
-  const prompt = `Jsi pomocník do kuchyně. Na fotce jsou potraviny (lednice, spíž nebo nákup).
-Vypiš VŠECHNY potraviny, které na fotce vidíš, česky a v 1. pádě jednotného čísla (např. "vejce", "mléko", "rajče").
-Odhadni množství. Jednotky používej jen: ks, g, ml.
-Odpověz POUZE validním JSON bez dalšího textu ve tvaru:
-{"ingredients":[{"name":"vejce","amount":6,"unit":"ks"},{"name":"mléko","amount":1000,"unit":"ml"}]}`;
+  const prompt = `Jsi kuchařský asistent, který z fotky rozpoznává potraviny.
 
-  const res = await env.AI.run(VISION_MODEL, {
-    messages: [
-      {
-        role: "user",
-        content: [
-          { type: "text", text: prompt },
-          { type: "image_url", image_url: { url: image } },
-        ],
-      },
-    ],
-    max_tokens: 1200,
-    temperature: 0.2,
-  });
+POSTUP:
+1. Projdi celou fotku — lednici, polici, stůl, nákupní tašku i obaly.
+2. Pojmenuj každou rozpoznatelnou potravinu česky, v 1. pádě jednotného čísla ("vejce", "mléko", "rajče").
+3. U každé odhadni množství. Jednotky používej jen: ks, g, ml.
 
-  const data = parseJson(res);
-  const list = Array.isArray(data?.ingredients) ? data.ingredients : [];
-  return { ingredients: list.map(cleanIngredient).filter(Boolean) };
+PRAVIDLA:
+- Ignoruj to, co není jídlo (nádobí, ruce, nábytek, pozadí, text v pozadí).
+- Rozmazaná fotka, špatné světlo ani šikmý úhel nejsou důvod k selhání: rozpoznej, co vidíš, a zbytek vynech.
+- Když je vidět jen část potraviny nebo jen obal, poznej ji podle nápisu a použij rozumné výchozí množství (1 ks, 100 g, 500 ml).
+- Nehádej přesná čísla, stačí rozumný odhad.
+- Stejnou potravinu nepiš dvakrát — množství sečti.
+
+KDYŽ FOTKU NELZE ZPRACOVAT (není na ní jídlo, je celá tmavá nebo nečitelná, nebo jde o něco jiného než potraviny):
+Nevymýšlej si potraviny. Vrať jen chybu, bez seznamu:
+{"error":"Na fotce nevidím žádné potraviny. Vyfoť obsah lednice nebo spíže zblízka a při dobrém světle."}
+
+VÝSTUP:
+- Odpověz POUZE validním JSON — žádný text okolo, žádné \`\`\` markery.
+- Nikdy nevracej prázdný seznam, prázdný řetězec ani jen "{}". Buď potraviny, nebo "error".
+- Tvar: {"ingredients":[{"name":"vejce","amount":6,"unit":"ks"},{"name":"mléko","amount":1000,"unit":"ml"}]}`;
+
+  // Model občas vrátí neúplný JSON nebo prázdný text — jednou to zkusíme znovu,
+  // a když ani podruhé nic nepřijde, vrátíme jasnou hlášku místo prázdna.
+  let data;
+  for (let attempt = 0; attempt < 2 && !data; attempt++) {
+    const res = await env.AI.run(VISION_MODEL, {
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: prompt },
+            { type: "image_url", image_url: { url: image } },
+          ],
+        },
+      ],
+      max_tokens: 1400,
+      temperature: attempt ? 0.1 : 0.2,
+    });
+    try {
+      data = parseJson(res);
+    } catch (err) {
+      if (attempt) throw new UserError(NO_FOOD);
+    }
+  }
+
+  // Model může poslat i vlastní {"error": "..."} — ten ukážeme uživateli
+  if (typeof data?.error === "string" && data.error.trim()) {
+    throw new UserError(data.error.trim().slice(0, 200));
+  }
+
+  const list = Array.isArray(data) ? data : data?.ingredients;
+  const ingredients = (Array.isArray(list) ? list : []).map(cleanIngredient).filter(Boolean);
+  if (!ingredients.length) throw new UserError(NO_FOOD);
+  return { ingredients };
 }
 
 // Návrhy receptů z toho, co je doma
@@ -172,8 +213,10 @@ function parseJson(res) {
 }
 
 function cleanIngredient(i) {
-  if (!i || !i.name) return null;
+  if (!i || typeof i.name !== "string") return null;
+  const name = i.name.trim();
+  if (!name) return null;
   const unit = ["ks", "g", "ml"].includes(i.unit) ? i.unit : "ks";
   const amount = Math.max(0, Math.round(Number(i.amount) || (unit === "ks" ? 1 : 100)));
-  return { name: String(i.name).trim().toLowerCase().slice(0, 40), amount, unit };
+  return { name: name.toLowerCase().slice(0, 40), amount, unit };
 }
