@@ -4,12 +4,15 @@ import * as store from "./store.js";
 import { parseIngredients, emojiFor } from "./parse.js";
 import { recognizeImage, suggestRecipes, resizeImage } from "./api.js";
 import { localSuggestions } from "./fallback.js";
+import { foodImg } from "./food.js";
 
 const $ = (sel) => document.querySelector(sel);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const fmt = store.formatAmount;
 
 const ICON_X = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+const ICON_ARROW = '<svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+const ICON_CLOCK = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>';
 const ICON_HEART = '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>';
 
 let suggested = [];   // aktuálně zobrazené návrhy
@@ -42,16 +45,16 @@ function renderPantry() {
   $("#cta-cook").hidden = pantry.length === 0;
   $("#pantry-list").innerHTML = pantry
     .map(
-      (p) => `
-    <li class="item" data-id="${p.id}">
-      <span class="item-emoji" aria-hidden="true">${emojiFor(p.name)}</span>
+      (p, i) => `
+    <li class="item" data-id="${p.id}" style="--i:${Math.min(i, 12)}">
+      <button type="button" class="del" data-act="del" aria-label="Odebrat ${esc(p.name)}">${ICON_X}</button>
+      <span class="item-art">${foodImg(emojiFor(p.name), "item-img")}</span>
       <span class="item-name">${esc(p.name)}</span>
       <div class="qty">
         <button type="button" data-act="minus" aria-label="Ubrat">−</button>
         <button type="button" class="qty-val" data-act="edit" title="Klikni pro úpravu">${fmt(p.amount, p.unit)}</button>
         <button type="button" data-act="plus" aria-label="Přidat">+</button>
       </div>
-      <button type="button" class="del" data-act="del" aria-label="Odebrat ${esc(p.name)}">${ICON_X}</button>
     </li>`
     )
     .join("");
@@ -166,7 +169,7 @@ function renderScanResult(image, ingredients) {
         .map(
           (i) => `<li>
           <input type="checkbox" checked aria-label="Přidat">
-          <span aria-hidden="true">${emojiFor(i.name)}</span>
+          ${foodImg(emojiFor(i.name), "s-img")}
           <input class="s-name" value="${esc(i.name)}" aria-label="Název">
           <input class="s-amt" type="number" min="0" value="${i.amount}" aria-label="Množství">
           ${unitSelect(i.unit)}
@@ -175,7 +178,7 @@ function renderScanResult(image, ingredients) {
         .join("")}
     </ul>
     <div class="sheet-actions">
-      <button type="button" class="btn btn-ghost" data-close>Zrušit</button>
+      <button type="button" class="btn btn-outline" data-close>Zrušit</button>
       <button type="button" class="btn btn-primary" id="scan-add">Přidat do spíže</button>
     </div>
   `);
@@ -304,16 +307,21 @@ function renderRecipes(container, list) {
       const rows = availability(r).filter((x) => !x.optional);
       const have = rows.filter((x) => x.state === "have").length;
       return `
-      <button type="button" class="recipe-card" data-idx="${idx}">
-        <span class="emoji" aria-hidden="true">${esc(r.emoji || "🍽️")}</span>
-        <h3>${esc(r.name)}</h3>
-        <p>${esc(r.description)}</p>
-        <span class="meta">
-          <span class="tag">⏱ ${r.time} min</span>
-          <span class="tag">${esc(r.difficulty)}</span>
-          ${rows.length ? `<span class="tag ${have === rows.length ? "ok" : ""}">máš ${have}/${rows.length}</span>` : ""}
-          ${r.source === "ai" ? '<span class="tag ai">✦ AI</span>' : ""}
+      <button type="button" class="recipe-card" data-idx="${idx}" style="--i:${idx}">
+        <span class="plate">
+          ${foodImg(r.emoji || "🍽️", "plate-img")}
+          ${r.source === "ai" ? '<span class="sticker">✦ návrh AI</span>' : ""}
         </span>
+        <span class="rc-body">
+          <span class="rc-title">${esc(r.name)}</span>
+          <span class="rc-desc">${esc(r.description)}</span>
+          <span class="meta">
+            <span class="tag">${ICON_CLOCK}${r.time} min</span>
+            <span class="tag">${esc(r.difficulty)}</span>
+            ${rows.length ? `<span class="tag ${have === rows.length ? "ok" : "part"}">máš ${have}/${rows.length}</span>` : ""}
+          </span>
+        </span>
+        <span class="rc-go" aria-hidden="true">${ICON_ARROW}</span>
       </button>`;
     })
     .join("");
@@ -328,37 +336,45 @@ function renderRecipes(container, list) {
 function openRecipe(recipe) {
   const rows = availability(recipe);
   const fav = store.isFavorite(recipe);
+  const need = rows.filter((x) => !x.optional);
+  const have = need.filter((x) => x.state === "have").length;
+  const noteFor = (r) =>
+    r.optional ? "dokoupit" : r.state === "low" ? `máš jen ${fmt(r.pantry.amount, r.pantry.unit)}` : r.state === "miss" ? "nemáš" : "";
   openSheet(`
-    <div class="sheet-top">
-      <span class="emoji" aria-hidden="true">${esc(recipe.emoji || "🍽️")}</span>
-      <div style="display:flex;gap:8px">
-        <button type="button" class="icon-btn ${fav ? "fav" : ""}" id="fav-btn" aria-label="Uložit do oblíbených">${ICON_HEART}</button>
+    <div class="rd-hero">
+      <div class="rd-tools">
         ${closeBtn()}
+        <button type="button" class="icon-btn ${fav ? "fav" : ""}" id="fav-btn" aria-label="Uložit do oblíbených">${ICON_HEART}</button>
       </div>
+      <div class="rd-plate">${foodImg(recipe.emoji || "🍽️", "rd-img")}</div>
     </div>
-    <h2>${esc(recipe.name)}</h2>
-    <p class="desc">${esc(recipe.description)}</p>
-    <div class="meta">
-      <span class="tag">⏱ ${recipe.time} min</span>
-      <span class="tag">${esc(recipe.difficulty)}</span>
-      <span class="tag">🍽 ${recipe.portions} ${plural(recipe.portions, "porce", "porce", "porcí")}</span>
+    <div class="rd-body">
+      <h2>${esc(recipe.name)}</h2>
+      <p class="rd-meta">${recipe.time} min — ${esc(recipe.difficulty)} — ${recipe.portions} ${plural(recipe.portions, "porce", "porce", "porcí")}</p>
+      <p class="desc">${esc(recipe.description)}</p>
+      <div class="rd-sec"><h4>Suroviny</h4>${need.length ? `<span class="rd-count ${have === need.length ? "ok" : ""}">doma máš ${have} z ${need.length}</span>` : ""}</div>
+      <ul class="ing">
+        ${rows
+          .map(
+            (r) => `<li class="${r.state}${r.optional ? " opt" : ""}">
+            <span class="ing-art">${foodImg(emojiFor(r.name), "ing-img")}<span class="dot">${r.state === "have" ? "✓" : r.state === "low" ? "!" : "+"}</span></span>
+            <span class="ing-name">${esc(r.name)}</span>
+            <span class="amt">${fmt(r.amount, r.unit)}</span>
+            ${noteFor(r) ? `<span class="note">${noteFor(r)}</span>` : ""}
+          </li>`
+          )
+          .join("")}
+        <li class="have basics">
+          <span class="ing-art">${foodImg("🧂", "ing-img")}<span class="dot">✓</span></span>
+          <span class="ing-name">sůl, pepř, olej a voda</span>
+          <span class="amt">ze základů</span>
+        </li>
+      </ul>
+      <div class="rd-sec"><h4>Postup</h4><span class="rd-hint">klikni na hotový krok</span></div>
+      <ol class="steps">${recipe.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
     </div>
-    <h4>Suroviny</h4>
-    <ul class="ing">
-      ${rows
-        .map(
-          (r) => `<li class="${r.state}">
-          <span class="dot">${r.state === "have" ? "✓" : r.state === "low" ? "!" : "+"}</span>
-          <span>${esc(r.name)} ${r.optional ? '<span class="note">· dokoupit</span>' : r.state === "low" ? `<span class="note">· máš jen ${fmt(r.pantry.amount, r.pantry.unit)}</span>` : r.state === "miss" ? '<span class="note">· nemáš</span>' : ""}</span>
-          <span class="amt">${fmt(r.amount, r.unit)}</span>
-        </li>`
-        )
-        .join("")}
-      <li class="have"><span class="dot">✓</span><span class="note">sůl, pepř, olej a voda</span></li>
-    </ul>
-    <h4>Postup <span style="text-transform:none;letter-spacing:0;font-weight:400">· klikni na hotový krok</span></h4>
-    <ol class="steps">${recipe.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
     <div class="sheet-actions">
+      <button type="button" class="btn btn-outline" data-close>Zavřít</button>
       <button type="button" class="btn btn-primary btn-big" id="cooked-btn">Uvařeno — odečíst ze spíže</button>
     </div>
   `);
@@ -390,9 +406,10 @@ function renderSaved() {
   $("#history").innerHTML = history
     .map(
       (h, idx) => `<li data-idx="${idx}">
-        <span class="h-emoji" aria-hidden="true">${esc(h.emoji || "🍽️")}</span>
-        <span><span class="h-name">${esc(h.name)}</span><br>
+        <span class="h-art">${foodImg(h.emoji || "🍽️", "h-img")}</span>
+        <span class="h-text"><span class="h-name">${esc(h.name)}</span>
         <span class="h-meta">${new Date(h.date).toLocaleDateString("cs-CZ", { day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })} · ${h.portions} ${plural(h.portions, "porce", "porce", "porcí")}${h.used.length ? " · spotřebováno: " + h.used.map((u) => `${u.name} ${fmt(u.amount, u.unit)}`).join(", ") : ""}</span></span>
+        <span class="h-go" aria-hidden="true">${ICON_ARROW}</span>
       </li>`
     )
     .join("");

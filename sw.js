@@ -1,6 +1,6 @@
 // Service worker: aplikace jde přidat na plochu mobilu a spíž funguje i offline.
 // Strategie "nejdřív síť" — po nasazení nové verze se vždy načte čerstvý kód.
-const CACHE = "remy-v1";
+const CACHE = "remy-v5";
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => e.waitUntil(self.clients.claim()));
